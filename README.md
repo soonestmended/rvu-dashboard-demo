@@ -22,7 +22,9 @@ shift counts — are shown normally.
 CP-SAT solver build next month's schedule live (it defaults to an open month so it solves in a
 few seconds).
 
-The demo logs in as an admin, so **all seven tabs are visible**.
+The demo logs in as an admin, so all six user-facing tabs are visible. (The admin-only
+**Settings** tab — user management and feature flags — is hidden in the demo, since its config
+is read-only there.)
 
 ---
 
@@ -109,8 +111,10 @@ Admins get an **impersonation picker** to preview any attending's view; individu
 - A **Salary components** table: `TNS`, `TAT`, `Section bonus`, `After-hours $/RVU`, `Weekday evening ER`, `Weekend evening ER`, and (when applicable) the `Flex*` **coverage** stipend, each with a plain-language "detail" of how it's computed.
 - A **fiscal-year calendar** colored by shift, with per-day hover popups (actual reads for past days, projections for future days; call days flagged).
 
-### 7. Settings
-*Admin only.* Toggle whether individual users can see the Pay Projection tab, and manage user accounts (reset a forgotten password back to its initial value). Nothing patient- or salary-related here.
+### 7. Settings *(admin-only — not shown in the public demo)*
+In the full app: toggle whether individual users can see the Pay Projection tab, and manage
+user accounts (reset a forgotten password back to its initial value). Nothing patient- or
+salary-related. Hidden in the demo because its config is mounted read-only there.
 
 ---
 

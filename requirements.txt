@@ -1,0 +1,13 @@
+flask
+flask-cors
+duckdb>=1.0.0
+pyyaml
+bcrypt
+pandas
+gspread
+gspread-formatting
+google-auth
+python-dateutil
+ortools
+pytest
+requests

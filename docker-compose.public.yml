@@ -1,0 +1,84 @@
+# Public demo stack — the fabricated demo app exposed to the internet behind Caddy
+# (automatic HTTPS), hardened for a TEMPORARY internet-facing deployment.
+#
+# Safety posture:
+#   - Fabricated data ONLY. Mounts data/demo.db + data/config-demo — never ./data/rvu.db.
+#   - DEMO_MODE=1: no live Google Sheet pulls; publish + schedule-refresh are no-ops.
+#   - FLASK_DEBUG=0: the interactive Werkzeug debugger (an RCE vector) is OFF.
+#   - No Google service-account key is mounted (the demo never calls Google).
+#   - FLASK_SECRET_KEY must be a real random value (session-cookie signing).
+#
+# Layout expected on the host (siblings, mirroring the dev checkout):
+#   <deploy>/rvu/         <- this repo (build contexts + data/demo.db + data/config-demo)
+#   <deploy>/scheduler/   <- the scheduler module (../scheduler), MINUS service_account.json
+#
+# Run from inside rvu/:
+#   export SITE_ADDRESS=demo.example.com          # your domain, or <dashed-ip>.sslip.io
+#   export DEMO_FLASK_SECRET_KEY=$(openssl rand -hex 32)
+#   docker compose -f docker-compose.public.yml -p rvu-public up -d --build
+#
+# See deploy/README-public-demo.md for the full walkthrough.
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - SITE_ADDRESS=${SITE_ADDRESS:?set SITE_ADDRESS to your domain or <dashed-ip>.sslip.io}
+    depends_on:
+      - frontend
+    networks:
+      - rvu-public-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"                 # reached only by Caddy over the internal network, not published
+    depends_on:
+      - backend
+    networks:
+      - rvu-public-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    expose:
+      - "5001"
+    networks:
+      - rvu-public-network
+    volumes:
+      # ONLY fabricated data — never ./data (which holds real rvu.db). config-demo is read-only
+      # so a runtime bug can't overwrite the fabricated config. The scheduler is mounted for the
+      # CP-SAT solver; it must NOT contain service_account.json (see the rsync --exclude in README).
+      - ./data/demo.db:/app/data/demo.db
+      - ./data/config-demo:/app/config:ro
+      - ./scheduler:/app/scheduler:ro
+    environment:
+      - DB_PATH=/app/data/demo.db
+      - PORT=5001
+      - CONFIG_DIR=/app/config
+      - DEMO_MODE=1
+      - FLASK_DEBUG=0
+      - FLASK_SECRET_KEY=${DEMO_FLASK_SECRET_KEY:?set a real >=16-char secret (openssl rand -hex 32)}
+      - USERS_YAML=/app/config/users.yaml
+      # SCHEDULER_SERVICE_ACCOUNT intentionally omitted — the demo never authenticates to Google.
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  rvu-public-network:
+    driver: bridge

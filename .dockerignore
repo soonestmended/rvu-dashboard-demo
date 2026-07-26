@@ -1,0 +1,15 @@
+# Keep the image build context small and free of data/secrets. The Dockerfiles only COPY
+# backend/ + requirements.txt (backend) and frontend/ sources (frontend); everything below is
+# either mounted at runtime (data/), unneeded, or must never enter an image.
+.git/
+data/
+config/
+.env
+**/__pycache__/
+**/*.pyc
+**/node_modules/
+frontend/dist/
+dist/
+build/
+*.pdf
+*.pptx

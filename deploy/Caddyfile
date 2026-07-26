@@ -1,0 +1,11 @@
+# Caddy config for the public demo. SITE_ADDRESS comes from the environment (your domain,
+# or a no-domain <dashed-ip>.sslip.io hostname). Caddy provisions a Let's Encrypt certificate
+# automatically over port 80/443, so HTTPS "just works" once DNS resolves to this box.
+{$SITE_ADDRESS} {
+	encode gzip
+	# flush_interval -1 disables response buffering so the NDJSON solver-progress stream
+	# reaches the browser line-by-line in real time (matches the frontend nginx proxy_buffering off).
+	reverse_proxy frontend:80 {
+		flush_interval -1
+	}
+}

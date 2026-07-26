@@ -1,0 +1,23 @@
+# ── Data / PHI — NEVER commit ────────────────────────────────────────────────
+# The demo dataset (demo.db + config-demo/) and any real data live only on the
+# deployment server, never in this repo.
+data/
+config-demo/
+*.db
+*.db.*
+*.duckdb
+
+# ── Secrets ──────────────────────────────────────────────────────────────────
+.env
+.env.*
+**/service_account*.json
+*.pem
+*.key
+
+# ── Build artifacts / caches ─────────────────────────────────────────────────
+**/node_modules/
+**/dist/
+**/build/
+**/__pycache__/
+*.pyc
+.DS_Store
